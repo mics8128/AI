@@ -147,7 +147,12 @@ function MyBox(size){
             var y=Math.sin(this.body.angle)*Math.sqrt(init_x*init_x + init_y*init_y);
             Body.applyForce(this.body, {x:0, y:0}, {x:x, y:y-force});
         }
+    this.destroy = function(){
+        World.remove(engine.world, this.body);
+        delete this;
     }
+}
+
 
 /************************* 
 ** ButtonFunction
