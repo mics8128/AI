@@ -55,25 +55,38 @@ World.add(engine.world, mouseConstraint);
 World.add(engine.world, [wall_top, ground, wall_left, wall_right]);
 //Event
 var collisionStartEvent = function(e){
-   for(var i=0;i<e.source.pairs.collisionStart.length; i++)
-   {
-           var coll = e.source.pairs.collisionStart[i];
-           var groundId = ground.id;
-           if(coll.bodyA.id == groundId || coll.bodyB.id == groundId)
-           {
-                   var calcObject = coll.bodyA.id != groundId ? coll.bodyA : coll.bodyB;
-                   //console.log("CollObject : " + calcObject.id + ", myboxs id is " + calcObject.myboxs_id);
-                   myboxs[calcObject.myboxs_id].jump();
-                   
-           }
-           else if(coll.bodyA.isStatic == false && coll.bodyB.isStatic == false)
-           {
-                    //console.log("CollObject : " + coll.bodyA.id + " with " + coll.bodyB.id);
-                   //myboxs[coll.bodyA.myboxs_id].jump();
-                   //myboxs[coll.bodyB.myboxs_id].jump();
-           }
-
-   }
+    for(var i=0;i<e.source.pairs.collisionStart.length; i++)
+    {
+        var coll = e.source.pairs.collisionStart[i];
+        var groundId = ground.id;
+        if(coll.bodyA.id == groundId || coll.bodyB.id == groundId)
+        {
+            var calcObject = coll.bodyA.id != groundId ? coll.bodyA : coll.bodyB;
+            //console.log("CollObject : " + calcObject.id + ", myboxs id is " + calcObject.myboxs_id);
+            myboxs[calcObject.myboxs_id].jump();
+            var memory = myboxs[calcObject.myboxs_id].memory;
+            var this_memory = {
+                type: 'start',
+                self: { 
+                    angel: calcObject.angle,
+                    angularSpeed: calcObject.angularSpeed,
+                    angularVelocity: calcObject.angularVelocity,
+                    position: calcObject.position,
+                    speed: calcObject.speed
+                },
+                target: "ground",
+                time: new Date().getTime()
+            };
+            memory[memory.length] = this_memory;
+            
+        }
+        else if(coll.bodyA.isStatic == false && coll.bodyB.isStatic == false)
+        {
+            //console.log("CollObject : " + coll.bodyA.id + " with " + coll.bodyB.id);
+            //myboxs[coll.bodyA.myboxs_id].jump();
+            //myboxs[coll.bodyB.myboxs_id].jump();
+        }
+    }
 };
 Events.on(engine, "collisionStart", collisionStartEvent ); 
 //Events.off(engine, "tick", tickevent );
@@ -91,6 +104,7 @@ var myboxs = [];
 function MyBox(size){
     this.body;
     this.health;
+    this.emotion;
     this.memory;
     this.comprehension;  //認知
     this.logic;
@@ -98,7 +112,12 @@ function MyBox(size){
     this.init = function() {
         this.body = Bodies.rectangle(400, 200, size, size);     
         World.add(engine.world, this.body);
-        health = 10;
+        this.health = 10;
+        this.emotion = 10;
+        this.memory = [];
+        this.comprehension = [];
+        this.logic = [];
+        this.target = [];
     };
     this.init();
     
