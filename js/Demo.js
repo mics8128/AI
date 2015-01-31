@@ -139,8 +139,9 @@ function MyBox(size){
     this.init();
     
     //function
-    this.jump = function(force){
-        if(isNaN(force))force=0.07;
+    this.jump = function(forceScale){
+        if(isNaN(forceScale))forceScale = 1;
+            var force = forceScale * 0.07;
             var init_x=force/2;
             var init_y=0;
             var x=Math.cos(this.body.angle)*Math.sqrt(init_x*init_x + init_y*init_y);
@@ -150,6 +151,18 @@ function MyBox(size){
     this.destroy = function(){
         World.remove(engine.world, this.body);
         delete this;
+    }
+    this.roateLeft = function(forceScale){ //BUG only on width 50 work good
+        if(isNaN(forceScale))forceScale = 1;
+        force = forceScale * 55;
+        Body.applyForce(this.body, {x: 50, y:0}, {x:0, y:-force});
+        Body.applyForce(this.body, {x: -50, y:0}, {x:0, y:force});
+    }
+    this.roateRight = function(forceScale){ //BUG only on width 50 work good
+        if(isNaN(forceScale))forceScale = 1;
+        force = -forceScale * 55;
+        Body.applyForce(this.body, {x: 50, y:0}, {x:0, y:-force});
+        Body.applyForce(this.body, {x: -50, y:0}, {x:0, y:force});
     }
 }
 
