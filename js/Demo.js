@@ -204,13 +204,13 @@ function MyBox(size){
     
     this.updateColor = function(){
         if(this.emotion <= -40){
-            this.body.render.fillStyle = "#B3B";
+            this.body.render.fillStyle = "#E66";
         }else if(this.emotion <= -20){
-            this.body.render.fillStyle = "#D66";
+            this.body.render.fillStyle = "#B5B";
         }else if(this.emotion >= 20){
             this.body.render.fillStyle = "#6A6";
         }else if(this.emotion >= 40){
-            this.body.render.fillStyle = "#3B3";
+            this.body.render.fillStyle = "#DB3";
         }else{ //一般顏色
         this.body.render.fillStyle = "#9AB";
         }
