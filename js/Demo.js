@@ -28,7 +28,7 @@ var engine = Engine.create(container, options);
 var renderOptions = engine.render.options;
 
 //renderOptions
-renderOptions.wireframes = true;
+renderOptions.wireframes = false;
 renderOptions.hasBounds = false;
 renderOptions.showDebug = false;
 renderOptions.showBroadphase = false;
@@ -45,22 +45,23 @@ renderOptions.background = '#fff';
 // create two boxes and a ground
 var wall_top = Bodies.rectangle(400, -30, 810, 100, { isStatic: true });
 var ground = Bodies.rectangle(400, 630, 810, 100, { isStatic: true });
-var wall_left = Bodies.rectangle(-30, 300, 100, 600, { isStatic: true });
-var wall_right = Bodies.rectangle(830, 300, 100, 600, { isStatic: true });
+var wall_left = Bodies.rectangle(-30, 300, 100, 610, { isStatic: true });
+var wall_right = Bodies.rectangle(830, 300, 100, 610, { isStatic: true });
 
 var mouseConstraint = MouseConstraint.create(engine);
 World.add(engine.world, mouseConstraint);
+Body.rotate(wall_right, Math.PI);
 
 // add all of the bodies to the world
 World.add(engine.world, [wall_top, ground, wall_left, wall_right]);
 /*****************
 **Event tick
 *****************/
-var tickcount = 0;
+var tickCount = 0;
 var tickEvent = function(e){
-    tickcount++;
-    if(tickcount > 60){
-        tickcount = 0;
+    tickCount++;
+    if(tickCount > 60){
+        tickCount = 0;
         for(var i = 0; i < myboxs.length; i++){
             body = myboxs[i].body;
             if(body.angularSpeed < 0.1 && body.speed < 0.3){
@@ -68,7 +69,7 @@ var tickEvent = function(e){
                 if((deg < 315 && deg > 225)){           //立正站好的
                     myboxs[i].healthChange(1);
                 } else if((deg < 135 && deg > 45)){     //倒立的
-                    myboxs[i].healthChange(-2);
+                    myboxs[i].healthChange(-1);
                     myboxs[i].emotionChange(-2);
                 } else {                                //側躺
                     //myboxs[i].healthChange(-1);
@@ -85,7 +86,6 @@ var tickEvent = function(e){
     }
 };
 Events.on(engine, "tick", tickEvent ); 
-
 
 /*****************
 **Event collisionStart
@@ -108,8 +108,16 @@ var collisionStartEvent = function(e){
             //console.log("CollObjectStart : " + coll.bodyA.id + " with " + coll.bodyB.id);
             insert_memory(coll.bodyA, coll.bodyB, "start");
             insert_memory(coll.bodyB, coll.bodyA, "start");
-            //myboxs[coll.bodyA.myboxs_id].jump();
-            //myboxs[coll.bodyB.myboxs_id].jump();
+            if(Math.abs(coll.bodyA.position.y - coll.bodyB.position.y) > 40){
+                if(coll.bodyA.position.y > coll.bodyB.position.y){ //A在下面
+                    myboxs[coll.bodyA.myboxs_id].emotionChange(-1);
+                    myboxs[coll.bodyB.myboxs_id].emotionChange(1);
+                    //console.log("song");
+                }else{ //B在下面
+                    myboxs[coll.bodyB.myboxs_id].emotionChange(-1);
+                    myboxs[coll.bodyA.myboxs_id].emotionChange(1);
+                }
+            }
         }
     }
 };
@@ -157,7 +165,8 @@ function MyBox(size){
 
     
     this.init = function() {
-        this.body = Bodies.rectangle(400, 200, size, size);     
+        this.body = Bodies.rectangle(400, 200, size, size);
+        this.updateColor();
         World.add(engine.world, this.body);
         this.health = 20;
         this.emotion = 5;
@@ -166,8 +175,8 @@ function MyBox(size){
         this.logic = [];
         this.target = [];
         this.isDead = false;
-        this.selectMinTime = 500;
-        this.selectMaxTime = 2000;
+        this.selectMinTime = 900;
+        this.selectMaxTime = 1100;
         this.selectJump = 3;
         this.selectLeft = 2;
         this.selectRight = 2;
@@ -181,6 +190,8 @@ function MyBox(size){
     this.selfTimer = function(self){
         var time = Math.floor(Math.random()*(self.selectMaxTime - self.selectMinTime)) + self.selectMinTime;
         time = time * self.speedInterScale;
+        if(self.health <= 5)time *= 0.5;
+        if(self.health <= 1)time *= 0.4;
         //console.log(time);
         self.doAction();
         setTimeout(self.selfTimer, time, self);
@@ -190,6 +201,27 @@ function MyBox(size){
     this.updateDisplay = function(){
         $( "#box" + this.body.id ).html("B" + this.body.id + "- H:" + this.health + " E:" + this.emotion);
     };
+    
+    this.updateColor = function(){
+        if(this.emotion <= -40){
+            this.body.render.fillStyle = "#B3B";
+        }else if(this.emotion <= -20){
+            this.body.render.fillStyle = "#D66";
+        }else if(this.emotion >= 20){
+            this.body.render.fillStyle = "#6A6";
+        }else if(this.emotion >= 40){
+            this.body.render.fillStyle = "#3B3";
+        }else{ //一般顏色
+        this.body.render.fillStyle = "#9AB";
+        }
+        if(this.health <= 1){
+            this.body.render.strokeStyle = "#FF0000";
+        }else if(this.health <= 5){
+            this.body.render.strokeStyle = "#AA0000";
+        }else{
+            this.body.render.strokeStyle = "rgba( 0,0,0,0.7)";
+        }
+    }
     this.healthChange = function(how){
         this.health += how;
         if(this.health <= 0){
@@ -197,12 +229,14 @@ function MyBox(size){
             this.health=0;
         }
         if(this.health > 20)this.health=20;
+        this.updateColor();
     };
     
     this.emotionChange = function(how){
         this.emotion += how;
         if(this.emotion < -50)this.emotion=-50;
         if(this.emotion > 50)this.emotion=50;
+        this.updateColor();
     };
     
     this.actionSet = function(jump,left,right,none){
@@ -213,7 +247,7 @@ function MyBox(size){
     };
     
     this.doAction = function(){
-        if(Math.abs(this.body.velocity.y) > 0.1)return; //有y動量就不能動
+        //if(Math.abs(this.body.velocity.y) > 0.1)return; //有y動量就不能動
         var selectAll = this.selectJump + this.selectLeft + this.selectRight + this.selectNone;
         var random = Math.ceil(Math.random()*selectAll);
         //console.log(random);
@@ -237,12 +271,20 @@ function MyBox(size){
         //none ~
         //do nothing XD
     }
+    this.forceHEScale = function(force_i){
+        var force = force_i;
+        if(Math.abs(this.emotion) >= 20)force *= 1.2;
+        if(Math.abs(this.emotion) >= 40)force *= 1.2;
+        return force;
+    }
     
     //function
     this.jump = function(forceScale){
+        if(Math.abs(this.body.velocity.y) > 0.1)return; //有y動量就不能動
         if(isNaN(forceScale))forceScale = 1;
         var force = forceScale * 0.07;
         force *= this.forceInterScale;
+        force = this.forceHEScale(force);
         var init_x=force/2;
         var init_y=0;
         var x=Math.cos(this.body.angle)*Math.sqrt(init_x*init_x + init_y*init_y);
@@ -258,6 +300,7 @@ function MyBox(size){
         if(isNaN(forceScale))forceScale = 1;
         var force = forceScale * 55;
         force *= this.forceInterScale;
+        force = this.forceHEScale(force);
         Body.applyForce(this.body, {x: 50, y:0}, {x:0, y:-force});
         Body.applyForce(this.body, {x: -50, y:0}, {x:0, y:force});
     };
@@ -265,6 +308,7 @@ function MyBox(size){
         if(isNaN(forceScale))forceScale = 1;
         var force = -forceScale * 55;
         force *= this.forceInterScale;
+        force = this.forceHEScale(force);
         Body.applyForce(this.body, {x: 50, y:0}, {x:0, y:-force});
         Body.applyForce(this.body, {x: -50, y:0}, {x:0, y:force});
     };
