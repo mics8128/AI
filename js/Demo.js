@@ -62,19 +62,15 @@ var collisionStartEvent = function(e){
            if(coll.bodyA.id == groundId || coll.bodyB.id == groundId)
            {
                    var calcObject = coll.bodyA.id != groundId ? coll.bodyA : coll.bodyB;
-                   //console.log("CollObject : " + calcObject.id);
-                   if(floatCompare(calcObject.angle,0))
-                   {}
-                   else if(floatCompare(calcObject.angle,0.5*Math.PI))
-                   {}
-                   else if(floatCompare(calcObject.angle,Math.PI))
-                   {}
-                   else if(floatCompare(calcObject.angle,1.5*Math.PI))
-                   {}
+                   //console.log("CollObject : " + calcObject.id + ", myboxs id is " + calcObject.myboxs_id);
+                   myboxs[calcObject.myboxs_id].jump();
+                   
            }
            else if(coll.bodyA.isStatic == false && coll.bodyB.isStatic == false)
            {
                     //console.log("CollObject : " + coll.bodyA.id + " with " + coll.bodyB.id);
+                   //myboxs[coll.bodyA.myboxs_id].jump();
+                   //myboxs[coll.bodyB.myboxs_id].jump();
            }
 
    }
@@ -118,7 +114,9 @@ function MyBox(size){
     }
 
 function addNewBox(){
-    myboxs[myboxs.length]=new MyBox(50);
+    var myboxs_id = myboxs.length;
+    myboxs[myboxs_id]=new MyBox(50);
+    myboxs[myboxs_id].body.myboxs_id = myboxs_id;
 }
 
 /************************* 
@@ -127,6 +125,6 @@ function addNewBox(){
 function floatCompare(a,b)
 {
         if(Math.abs(a - b) < 0.1)
-                return true;
+            return true;
         return false;
 }
