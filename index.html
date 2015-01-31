@@ -16,15 +16,20 @@
         <script type="text/javascript" src="./js/lib/matter-tools/matter-tools-dev.js"></script>
         -->
         
-
+        <style>
+            #canvas-container {
+                float:left;
+                margin-right: 10px;
+            }
+        </style>
         <title>Matter.js Physics Engine Demo</title>
     </head>
     <body>
         <div class="container">
             <div id="canvas-container"></div>
-            <input type="button" onclick="addNewBox()" value="AddBox">
+            <input type="button" onclick="addNewBox()" value="AddBox"> <br />
+            <input type="button" onclick="addNewBox()" value="Jump" disabled>
         </div>
-        
     </body>
     <script type="text/javascript" src="./js/Demo.js"></script>
 </html>

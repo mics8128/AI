@@ -149,6 +149,9 @@ function MyBox(size){
         }
     }
 
+/************************* 
+** ButtonFunction
+*************************/
 function addNewBox(){
     var myboxs_id = myboxs.length;
     myboxs[myboxs_id]=new MyBox(50);
@@ -156,7 +159,7 @@ function addNewBox(){
 }
 
 /************************* 
-** SomeFucntion
+** SomeFunction
 *************************/
 function floatCompare(a,b)
 {
