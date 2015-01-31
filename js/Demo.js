@@ -54,6 +54,36 @@ World.add(engine.world, mouseConstraint);
 // add all of the bodies to the world
 World.add(engine.world, [wall_top, ground, wall_left, wall_right]);
 /*****************
+**Event tick
+*****************/
+var tickcount = 0;
+var tickEvent = function(e){
+    tickcount++;
+    if(tickcount > 60){
+        tickcount = 0;
+        for(var i = 0; i < myboxs.length; i++){
+            body = myboxs[i].body;
+            if(body.angularSpeed < 0.1 && body.speed < 0.3){
+                var deg = rad_to_deg(body.angle);
+                if((deg < 315 && deg > 225)){ //立正站好的
+                    myboxs[i].emotionChange(1);
+                } else {
+                    myboxs[i].healthChange(-1);
+                    myboxs[i].emotionChange(-1);
+                }
+                if((deg < 135 && deg > 45)){ //倒立的
+                    myboxs[i].healthChange(-1);
+                    myboxs[i].emotionChange(-1);
+                }
+            }
+            myboxs[i].updateDisplay();
+        }
+    }
+};
+Events.on(engine, "tick", tickEvent ); 
+
+
+/*****************
 **Event collisionStart
 *****************/
 var collisionStartEvent = function(e){
@@ -126,6 +156,8 @@ function MyBox(size){
     this.comprehension;  //認知
     this.logic;
     this.target;
+    this.isDead;
+    
     this.init = function() {
         this.body = Bodies.rectangle(400, 200, size, size);     
         World.add(engine.world, this.body);
@@ -135,9 +167,28 @@ function MyBox(size){
         this.comprehension = [];
         this.logic = [];
         this.target = [];
+        this.isDead = false;
+        $( "#health-bar" ).html($( "#health-bar" ).html() + "<div id=\"box" + this.body.id + "\">Loading...</div>");
     };
     this.init();
     
+    this.updateDisplay = function(){
+        $( "#box" + this.body.id ).html("B" + this.body.id + "- H:" + this.health + " E:" + this.emotion);
+    };
+    this.healthChange = function(how){
+        this.health += how;
+        if(this.health < 0){
+            this.destroy();
+            this.health=0;
+        }
+        //if(this.health > 10)this.health=10;
+    };
+    
+    this.emotionChange = function(how){
+        this.emotion += how;
+        if(this.emotion < -50)this.emotion=-50;
+        if(this.emotion > 50)this.emotion=50;
+    };
     //function
     this.jump = function(forceScale){
         if(isNaN(forceScale))forceScale = 1;
@@ -147,23 +198,24 @@ function MyBox(size){
             var x=Math.cos(this.body.angle)*Math.sqrt(init_x*init_x + init_y*init_y);
             var y=Math.sin(this.body.angle)*Math.sqrt(init_x*init_x + init_y*init_y);
             Body.applyForce(this.body, {x:0, y:0}, {x:x, y:y-force});
-        }
+        };
     this.destroy = function(){
         World.remove(engine.world, this.body);
-        delete this;
-    }
+        $( "#box" + this.body.id ).remove();
+        this.isDead = true;
+    };
     this.roateLeft = function(forceScale){ //BUG only on width 50 work good
         if(isNaN(forceScale))forceScale = 1;
         force = forceScale * 55;
         Body.applyForce(this.body, {x: 50, y:0}, {x:0, y:-force});
         Body.applyForce(this.body, {x: -50, y:0}, {x:0, y:force});
-    }
+    };
     this.roateRight = function(forceScale){ //BUG only on width 50 work good
         if(isNaN(forceScale))forceScale = 1;
         force = -forceScale * 55;
         Body.applyForce(this.body, {x: 50, y:0}, {x:0, y:-force});
         Body.applyForce(this.body, {x: -50, y:0}, {x:0, y:force});
-    }
+    };
 }
 
 
@@ -194,7 +246,7 @@ function insert_memory(body, target, type){
             angularSpeed: target.angularSpeed,
             angularVelocity: target.angularVelocity,
             position: target.position,
-            speed: target.speed
+            velocity: target.velocity
         }
     }
     var memory = myboxs[body.myboxs_id].memory;
@@ -205,10 +257,19 @@ function insert_memory(body, target, type){
             angularSpeed: body.angularSpeed,
             angularVelocity: body.angularVelocity,
             position: body.position,
-            speed: body.speed
+            velocity: body.velocity
         },
         target: target,
         time: new Date().getTime()
     };
     memory[memory.length] = this_memory;
+}
+function rad_to_deg(rad){
+    var deg = rad/2/Math.PI*360;
+    if(deg<0){
+        deg = 360 + (deg % 360);
+    } else {
+        deg = deg % 360;
+    }
+    return deg;
 }
