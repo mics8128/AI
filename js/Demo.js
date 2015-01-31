@@ -65,19 +65,23 @@ var tickEvent = function(e){
             body = myboxs[i].body;
             if(body.angularSpeed < 0.1 && body.speed < 0.3){
                 var deg = rad_to_deg(body.angle);
-                if((deg < 315 && deg > 225)){ //立正站好的
-                    myboxs[i].emotionChange(1);
-                } else {
-                    myboxs[i].healthChange(-1);
-                    myboxs[i].emotionChange(-1);
+                if((deg < 315 && deg > 225)){           //立正站好的
+                    myboxs[i].healthChange(1);
+                } else if((deg < 135 && deg > 45)){     //倒立的
+                    myboxs[i].healthChange(-2);
+                    myboxs[i].emotionChange(-2);
+                } else {                                //側躺
+                    //myboxs[i].healthChange(-1);
+                    //myboxs[i].emotionChange(-1);
                 }
-                if((deg < 135 && deg > 45)){ //倒立的
-                    myboxs[i].healthChange(-1);
-                    myboxs[i].emotionChange(-1);
-                }
+                
             }
             myboxs[i].updateDisplay();
+            
+            //test action
+            //myboxs[i].doAction();
         }
+        
     }
 };
 Events.on(engine, "tick", tickEvent ); 
@@ -149,39 +153,50 @@ Engine.run(engine);
 var myboxs = [];
 
 function MyBox(size){
-    this.body;
-    this.health;
-    this.emotion;
-    this.memory;
-    this.comprehension;  //認知
-    this.logic;
-    this.target;
-    this.isDead;
+    
+
     
     this.init = function() {
         this.body = Bodies.rectangle(400, 200, size, size);     
         World.add(engine.world, this.body);
-        this.health = 10;
-        this.emotion = 10;
+        this.health = 20;
+        this.emotion = 5;
         this.memory = [];
-        this.comprehension = [];
+        this.comprehension = [];//認知
         this.logic = [];
         this.target = [];
         this.isDead = false;
+        this.selectMinTime = 500;
+        this.selectMaxTime = 2000;
+        this.selectJump = 3;
+        this.selectLeft = 2;
+        this.selectRight = 2;
+        this.selectNone = 3;
+        this.forceInterScale = Math.random()*0.4+1;
+        this.speedInterScale = Math.random()*0.4+1;
         $( "#health-bar" ).html($( "#health-bar" ).html() + "<div id=\"box" + this.body.id + "\">Loading...</div>");
+        setTimeout(this.selfTimer, 2000, this);
     };
-    this.init();
+    
+    this.selfTimer = function(self){
+        var time = Math.floor(Math.random()*(self.selectMaxTime - self.selectMinTime)) + self.selectMinTime;
+        time = time * self.speedInterScale;
+        //console.log(time);
+        self.doAction();
+        setTimeout(self.selfTimer, time, self);
+    }
+
     
     this.updateDisplay = function(){
         $( "#box" + this.body.id ).html("B" + this.body.id + "- H:" + this.health + " E:" + this.emotion);
     };
     this.healthChange = function(how){
         this.health += how;
-        if(this.health < 0){
+        if(this.health <= 0){
             this.destroy();
             this.health=0;
         }
-        //if(this.health > 10)this.health=10;
+        if(this.health > 20)this.health=20;
     };
     
     this.emotionChange = function(how){
@@ -189,16 +204,51 @@ function MyBox(size){
         if(this.emotion < -50)this.emotion=-50;
         if(this.emotion > 50)this.emotion=50;
     };
+    
+    this.actionSet = function(jump,left,right,none){
+        this.selectJump = jump;
+        this.selectLeft = left;
+        this.selectRight = right;
+        this.selectNone = none;
+    };
+    
+    this.doAction = function(){
+        if(Math.abs(this.body.velocity.y) > 0.1)return; //有y動量就不能動
+        var selectAll = this.selectJump + this.selectLeft + this.selectRight + this.selectNone;
+        var random = Math.ceil(Math.random()*selectAll);
+        //console.log(random);
+        if(random <= this.selectJump){
+            this.jump();
+            //console.log("JUMP");
+            return;
+        }
+        random -= this.selectJump;
+        
+        if(random <= this.selectLeft){
+            this.roateLeft();
+            return;
+        }
+        random -= this.selectLeft;
+        
+        if(random <= this.selectRight){
+            this.roateRight();
+            return;
+        }
+        //none ~
+        //do nothing XD
+    }
+    
     //function
     this.jump = function(forceScale){
         if(isNaN(forceScale))forceScale = 1;
-            var force = forceScale * 0.07;
-            var init_x=force/2;
-            var init_y=0;
-            var x=Math.cos(this.body.angle)*Math.sqrt(init_x*init_x + init_y*init_y);
-            var y=Math.sin(this.body.angle)*Math.sqrt(init_x*init_x + init_y*init_y);
-            Body.applyForce(this.body, {x:0, y:0}, {x:x, y:y-force});
-        };
+        var force = forceScale * 0.07;
+        force *= this.forceInterScale;
+        var init_x=force/2;
+        var init_y=0;
+        var x=Math.cos(this.body.angle)*Math.sqrt(init_x*init_x + init_y*init_y);
+        var y=Math.sin(this.body.angle)*Math.sqrt(init_x*init_x + init_y*init_y);
+        Body.applyForce(this.body, {x:0, y:0}, {x:x, y:y-force});
+    };
     this.destroy = function(){
         World.remove(engine.world, this.body);
         $( "#box" + this.body.id ).remove();
@@ -206,17 +256,21 @@ function MyBox(size){
     };
     this.roateLeft = function(forceScale){ //BUG only on width 50 work good
         if(isNaN(forceScale))forceScale = 1;
-        force = forceScale * 55;
+        var force = forceScale * 55;
+        force *= this.forceInterScale;
         Body.applyForce(this.body, {x: 50, y:0}, {x:0, y:-force});
         Body.applyForce(this.body, {x: -50, y:0}, {x:0, y:force});
     };
     this.roateRight = function(forceScale){ //BUG only on width 50 work good
         if(isNaN(forceScale))forceScale = 1;
-        force = -forceScale * 55;
+        var force = -forceScale * 55;
+        force *= this.forceInterScale;
         Body.applyForce(this.body, {x: 50, y:0}, {x:0, y:-force});
         Body.applyForce(this.body, {x: -50, y:0}, {x:0, y:force});
     };
-}
+    
+    this.init();
+} // MyBox End //
 
 
 /************************* 
