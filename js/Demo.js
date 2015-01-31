@@ -53,7 +53,9 @@ World.add(engine.world, mouseConstraint);
 
 // add all of the bodies to the world
 World.add(engine.world, [wall_top, ground, wall_left, wall_right]);
-//Event
+/*****************
+**Event collisionStart
+*****************/
 var collisionStartEvent = function(e){
     for(var i=0;i<e.source.pairs.collisionStart.length; i++)
     {
@@ -62,35 +64,50 @@ var collisionStartEvent = function(e){
         if(coll.bodyA.id == groundId || coll.bodyB.id == groundId)
         {
             var calcObject = coll.bodyA.id != groundId ? coll.bodyA : coll.bodyB;
-            //console.log("CollObject : " + calcObject.id + ", myboxs id is " + calcObject.myboxs_id);
-            myboxs[calcObject.myboxs_id].jump();
-            var memory = myboxs[calcObject.myboxs_id].memory;
-            var this_memory = {
-                type: 'start',
-                self: { 
-                    angel: calcObject.angle,
-                    angularSpeed: calcObject.angularSpeed,
-                    angularVelocity: calcObject.angularVelocity,
-                    position: calcObject.position,
-                    speed: calcObject.speed
-                },
-                target: "ground",
-                time: new Date().getTime()
-            };
-            memory[memory.length] = this_memory;
+            //console.log("CollObjectStart : " + calcObject.id + ", myboxs id is " + calcObject.myboxs_id);
+            insert_memory(calcObject, "ground", "start");
+            //myboxs[calcObject.myboxs_id].jump();
             
         }
         else if(coll.bodyA.isStatic == false && coll.bodyB.isStatic == false)
         {
-            //console.log("CollObject : " + coll.bodyA.id + " with " + coll.bodyB.id);
+            //console.log("CollObjectStart : " + coll.bodyA.id + " with " + coll.bodyB.id);
+            insert_memory(coll.bodyA, coll.bodyB, "start");
+            insert_memory(coll.bodyB, coll.bodyA, "start");
             //myboxs[coll.bodyA.myboxs_id].jump();
             //myboxs[coll.bodyB.myboxs_id].jump();
         }
     }
 };
 Events.on(engine, "collisionStart", collisionStartEvent ); 
-//Events.off(engine, "tick", tickevent );
 
+/*****************
+**Event collisionEnd
+*****************/
+var collisionEndEvent = function(e){
+    for(var i=0;i<e.source.pairs.collisionEnd.length; i++)
+    {
+        var coll = e.source.pairs.collisionEnd[i];
+        var groundId = ground.id;
+        if(coll.bodyA.id == groundId || coll.bodyB.id == groundId)
+        {
+            var calcObject = coll.bodyA.id != groundId ? coll.bodyA : coll.bodyB;
+            //console.log("CollObjectEnd : " + calcObject.id + ", myboxs id is " + calcObject.myboxs_id);
+            insert_memory(calcObject, "ground", "end");
+            
+        }
+        else if(coll.bodyA.isStatic == false && coll.bodyB.isStatic == false)
+        {
+            //console.log("CollObjectEnd : " + coll.bodyA.id + " with " + coll.bodyB.id);
+            insert_memory(coll.bodyA, coll.bodyB, "end");
+            insert_memory(coll.bodyB, coll.bodyA, "end");
+        }
+    }
+};
+Events.on(engine, "collisionEnd", collisionEndEvent ); 
+
+
+//RUN!!!!!!!
 Engine.run(engine);
 
 
@@ -146,4 +163,31 @@ function floatCompare(a,b)
         if(Math.abs(a - b) < 0.1)
             return true;
         return false;
+}
+
+function insert_memory(body, target, type){
+    if(target != "ground"){
+        target = {
+            id: target.id,
+            angel: target.angle,
+            angularSpeed: target.angularSpeed,
+            angularVelocity: target.angularVelocity,
+            position: target.position,
+            speed: target.speed
+        }
+    }
+    var memory = myboxs[body.myboxs_id].memory;
+    var this_memory = {
+        type: type,
+        self: { 
+            angel: body.angle,
+            angularSpeed: body.angularSpeed,
+            angularVelocity: body.angularVelocity,
+            position: body.position,
+            speed: body.speed
+        },
+        target: target,
+        time: new Date().getTime()
+    };
+    memory[memory.length] = this_memory;
 }
