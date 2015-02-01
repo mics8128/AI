@@ -369,6 +369,13 @@ function MyBox(size){
             left = readExp(left);
             right = readExp(right);
             none = readExp(none);
+            min = Math.min(jump, left, right, none);
+            if(min < 0){
+                jump -= min;
+                left -= min;
+                right -= min;
+                none -= min;
+            }
             console.log(jump, left, right, none);
             console.log("Key:" + this.lastStatus + this.lastAction + "\nAngle:" +newAngleExp + "\nHealth:" +newHealthExp + "\nEmotion:" +newEmotionExp + "\nCount:" +count);
         }
