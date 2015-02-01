@@ -24,15 +24,16 @@
              display:table-row;   
             }
             #canvas-container {
+                
                 display:table-cell;   
             }
             #health-bar{
-                font-size:20px;
-                width:250px;
+                width:150px;
+                display:table-cell;  
                 vertical-align: top;
             }
             #add_sugar {
-                width:250px;
+                width:150px;
                 display:table-cell;
                 vertical-align: top;
             }
@@ -41,9 +42,7 @@
                 height:30px;
                 
             }
-            .color_hp { color:#e60000;}
             
-            .color_em { color:#0880f8;}
         </style>
         <title>Jump Sugar</title>
     </head>
@@ -51,11 +50,8 @@
         <div class="container">
 
             <div id="canvas-container"></div>
-            <div id="add_sugar">
-                <input type="button" onclick="addNewBox()" value="Add Jump Sugar" >  
-                <div id="health-bar"></div>
-            </div>
-            
+            <div id="add_sugar"><input type="button" onclick="addNewBox()" value="Add Jump Sugar" ></div>
+            <div id="health-bar"></div>
         </div>
     </body
 </html>

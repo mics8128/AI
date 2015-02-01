@@ -175,8 +175,8 @@ function MyBox(size){
         //this.logic = [];
         //this.target = [];
         this.isDead = false;
-        this.selectMinTime = 900;
-        this.selectMaxTime = 1100;
+        this.selectMinTime = 1100;
+        this.selectMaxTime = 1300;
         this.selectJump = 3;
         this.selectLeft = 2;
         this.selectRight = 2;
@@ -199,29 +199,30 @@ function MyBox(size){
 
     //UPDATE=============
     this.updateDisplay = function(){
-        $( "#box" + this.body.id ).html("B" + this.body.id + "- H:" + this.health + " E:" + this.emotion);
+        $( "#box" + this.body.id ).html("No." + this.body.id + " - H:<span class=\"color_hp\">" + this.health + "</span> E:<span class=\"color_em\">" + this.emotion + "</span>");
     };
     
     this.updateColor = function(){
         if(this.emotion <= -40){
-            this.body.render.fillStyle = "#E66";
+            this.body.render.fillStyle = "#1f5784";
         }else if(this.emotion <= -20){
-            this.body.render.fillStyle = "#B5B";
+            this.body.render.fillStyle = "#479ee5";
         }else if(this.emotion >= 20){
-            this.body.render.fillStyle = "#6A6";
+            this.body.render.fillStyle = "#bae0ff";
         }else if(this.emotion >= 40){
-            this.body.render.fillStyle = "#DB3";
+            this.body.render.fillStyle = "#baffe6";
         }else{ //一般顏色
-        this.body.render.fillStyle = "#9AB";
+        this.body.render.fillStyle = "#73baf4";
         }
         if(this.health <= 1){
-            this.body.render.strokeStyle = "#FF0000";
+            this.body.render.strokeStyle = "#fc0b0b";
         }else if(this.health <= 5){
-            this.body.render.strokeStyle = "#AA0000";
+            this.body.render.strokeStyle = "#ff4848";
         }else{
-            this.body.render.strokeStyle = "rgba( 0,0,0,0.7)";
+            this.body.render.strokeStyle = "#9d7272";
         }
     }
+    
     
     //datachanger
     this.healthChange = function(how){
@@ -322,15 +323,16 @@ function MyBox(size){
         //console.log(this.memory);
         if(this.memory.length > 0 && !isNaN(this.lastStatus)&& !isNaN(this.lastAction)){ // do comprehension
             var newAngleExp = this.body.angle - this.memory[0].self.angle;
-            var newHealthExp = this.body.angle - this.memory[0].self.health;
-            var newEmotionExp = this.body.angle - this.memory[0].self.emotion;
+            var newHealthExp = this.health - this.memory[0].self.health;
+            var newEmotionExp = this.emotion - this.memory[0].self.emotion;
             var count = 1;
-            if(!isNaN(this.comprehension[this.lastStatus + this.lastAction])){
+            if(this.comprehension[this.lastStatus + this.lastAction]){
                 var comp = this.comprehension[this.lastStatus + this.lastAction];
-                newAngleExp = (comp.angleExpect*count + newEmotionExp)/(count+1);
-                newHealthExp = (comp.healthExpect*count + newEmotionExp)/(count+1);
-                newEmotionExp = (comp.emotionExpect*count + newEmotionExp)/(count+1);
-                count = comp.count + 1;
+                count = comp.count;
+                newAngleExp = (comp.angleExpect*count + newAngleExp) / (count+1);
+                newHealthExp = (comp.healthExpect*count + newHealthExp) / (count+1);
+                newEmotionExp = (comp.emotionExpect*count + newEmotionExp) / (count+1);
+                count += 1;
             }
             this.comprehension[this.lastStatus + this.lastAction] = {
                 angleExpect: newAngleExp,
@@ -338,7 +340,29 @@ function MyBox(size){
                 emotionExpect: newEmotionExp,
                 count: count
             };
-            console.log(newAngleExp + " " +newHealthExp + " " +newEmotionExp);
+            var jump = this.comprehension[this.lastStatus + "0"];
+            var left = this.comprehension[this.lastStatus + "1"];
+            var right = this.comprehension[this.lastStatus + "2"];
+            var none = this.comprehension[this.lastStatus + "3"];
+            var readEmotionExp = function(data){
+                if(data && data.count > 10){
+                    data=data.emotionExpect;
+                } else {
+                    data=0.3;
+                }
+                return data;
+            };
+            var readEmotionExp = function(data){
+                if(data && data.count > 10){
+                    data=data.emotionExpect;
+                } else {
+                    data=0.3;
+                }
+                return data;
+            };
+            jump = readEmotionExp(jump);
+            this.actionSet(jump, left, right, none);
+            //console.log("Key:" + this.lastStatus + this.lastAction + "\nAngle:" +newAngleExp + "\nHealth:" +newHealthExp + "\nEmotion:" +newEmotionExp + "\nCount:" +count);
         }
         this.memory = [];
         insert_memory(this.body,"none","beforeAction");
