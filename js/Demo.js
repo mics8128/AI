@@ -172,8 +172,8 @@ function MyBox(size){
         this.emotion = 5;
         this.memory = [];
         this.comprehension = [];//認知
-        this.logic = [];
-        this.target = [];
+        //this.logic = [];
+        //this.target = [];
         this.isDead = false;
         this.selectMinTime = 900;
         this.selectMaxTime = 1100;
@@ -197,7 +197,7 @@ function MyBox(size){
         setTimeout(self.selfTimer, time, self);
     }
 
-    
+    //UPDATE=============
     this.updateDisplay = function(){
         $( "#box" + this.body.id ).html("B" + this.body.id + "- H:" + this.health + " E:" + this.emotion);
     };
@@ -222,6 +222,8 @@ function MyBox(size){
             this.body.render.strokeStyle = "rgba( 0,0,0,0.7)";
         }
     }
+    
+    //datachanger
     this.healthChange = function(how){
         this.health += how;
         if(this.health <= 0){
@@ -239,6 +241,7 @@ function MyBox(size){
         this.updateColor();
     };
     
+    //about action
     this.actionSet = function(jump,left,right,none){
         this.selectJump = jump;
         this.selectLeft = left;
@@ -247,7 +250,8 @@ function MyBox(size){
     };
     
     this.doAction = function(){
-        //if(Math.abs(this.body.velocity.y) > 0.1)return; //有y動量就不能動
+        if(Math.abs(this.body.velocity.y) > 0.1)return; //有y動量就不能動
+        this.writeComprehension();
         var selectAll = this.selectJump + this.selectLeft + this.selectRight + this.selectNone;
         var random = Math.ceil(Math.random()*selectAll);
         //console.log(random);
@@ -271,6 +275,7 @@ function MyBox(size){
         //none ~
         //do nothing XD
     }
+    
     this.forceHEScale = function(force_i){
         var force = force_i;
         if(Math.abs(this.emotion) >= 20)force *= 1.2;
@@ -280,7 +285,6 @@ function MyBox(size){
     
     //function
     this.jump = function(forceScale){
-        if(Math.abs(this.body.velocity.y) > 0.1)return; //有y動量就不能動
         if(isNaN(forceScale))forceScale = 1;
         var force = forceScale * 0.07;
         force *= this.forceInterScale;
@@ -290,11 +294,6 @@ function MyBox(size){
         var x=Math.cos(this.body.angle)*Math.sqrt(init_x*init_x + init_y*init_y);
         var y=Math.sin(this.body.angle)*Math.sqrt(init_x*init_x + init_y*init_y);
         Body.applyForce(this.body, {x:0, y:0}, {x:x, y:y-force});
-    };
-    this.destroy = function(){
-        World.remove(engine.world, this.body);
-        $( "#box" + this.body.id ).remove();
-        this.isDead = true;
     };
     this.roateLeft = function(forceScale){ //BUG only on width 50 work good
         if(isNaN(forceScale))forceScale = 1;
@@ -311,6 +310,57 @@ function MyBox(size){
         force = this.forceHEScale(force);
         Body.applyForce(this.body, {x: 50, y:0}, {x:0, y:-force});
         Body.applyForce(this.body, {x: -50, y:0}, {x:0, y:force});
+    };
+    
+    
+    //about coll~
+    this.writeComprehension = function(){
+        //console.log(this.memory);
+        if(this.memory.length > 0){
+            console.log(this.getNearData());
+        }
+        this.memory = [];
+        insert_memory(this.body,"none","beforeAction");
+    }
+    
+    this.getNearData = function(){
+        var coll = engine.pairs.collisionActive;
+        var bottom = "0";
+        var top = "0";
+        for(var i=0; i<coll.length; i++){
+            if(coll[i].bodyA.id == this.body.id || coll[i].bodyB.id == this.body.id ){
+                var bodyB;
+                var bodyA;
+                if(coll[i].bodyB.id == this.body.id){
+                    bodyB = coll[i].bodyA;
+                    bodyA = this.body;
+                } else {
+                    bodyA = coll[i].bodyA;
+                    bodyB = coll[i].bodyB;
+                }
+                if(bodyB.id == ground.id){
+                    bottom = 2;
+                } else if(bodyA.isStatic == false && bodyB.isStatic == false) {
+                    if(Math.abs(bodyA.position.y - bodyB.position.y) > 40){
+                        if(bodyA.position.y > bodyB.position.y){ //A在下面
+                            top = "1";
+                        } else {
+                            bottom = "1";
+                        }
+                    }
+                }
+            }
+        }
+        return top + bottom;
+    };
+    
+    
+    //about object
+    
+    this.destroy = function(){
+        World.remove(engine.world, this.body);
+        $( "#box" + this.body.id ).remove();
+        this.isDead = true;
     };
     
     this.init();
