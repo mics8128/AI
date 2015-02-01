@@ -1,3 +1,17 @@
+/*
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 // Matter.js module aliases
 var Engine = Matter.Engine,
     World = Matter.World,
@@ -30,7 +44,7 @@ var renderOptions = engine.render.options;
 //renderOptions
 renderOptions.wireframes = false;
 renderOptions.hasBounds = false;
-renderOptions.showDebug = true;
+renderOptions.showDebug = false;
 renderOptions.showBroadphase = false;
 renderOptions.showBounds = false;
 renderOptions.showVelocity = false;
@@ -111,12 +125,12 @@ var collisionStartEvent = function(e){
                 if(coll.bodyA.position.y > coll.bodyB.position.y){ //A在下面
                     myboxs[coll.bodyA.myboxs_id].emotionChange(-1);
                     myboxs[coll.bodyA.myboxs_id].healthChange(-0.2);
-                    myboxs[coll.bodyB.myboxs_id].emotionChange(1);
+                    myboxs[coll.bodyB.myboxs_id].emotionChange(2);
                     //console.log("song");
                 }else{ //B在下面
                     myboxs[coll.bodyB.myboxs_id].emotionChange(-1);
                     myboxs[coll.bodyB.myboxs_id].healthChange(-0.2);
-                    myboxs[coll.bodyA.myboxs_id].emotionChange(1);
+                    myboxs[coll.bodyA.myboxs_id].emotionChange(2);
                 }
             }
         } else if(coll.bodyA.id == wall_top.id || coll.bodyB.id == wall_top.id) {
@@ -223,27 +237,39 @@ function MyBox(size){
         
         this.body.render.lineWidth = 2;
         
-        /*
+        
         if(this.emotion <= -40){
-            this.body.render.fillStyle = "#a9cdff";
+            this.body.render.fillStyle = "#60a2ff";
         }else if(this.emotion <= -20){
-            this.body.render.fillStyle = "#a9cdff";
+            this.body.render.fillStyle = "#80b5ff";
         }else if(this.emotion >= 20){
-            this.body.render.fillStyle = "#a9cdff";
+            this.body.render.fillStyle = "#cfe3ff";
         }else if(this.emotion >= 40){
-            this.body.render.fillStyle = "#a9cdff";
+            this.body.render.fillStyle = "#f5f9ff";
         }else{ //一般顏色
-            this.body.render.fillStyle = "#f03653";
+            this.body.render.fillStyle = "#a9cdff";
         }
-        */
+        
+        
         this.body.render.strokeStyle = "#FFF";
-        this.body.render.fillStyle = "#a9cdff";
+        if(this.health < 15) this.body.render.strokeStyle = "rgba(255, 255, 255, 0.79)";
+        if(this.health < 10) this.body.render.strokeStyle = "rgba(255, 255, 255, 0.53)";
+        if(this.health < 5) this.body.render.strokeStyle = "rgba(255, 255, 255, 0.22)";
+        
+        
+        
+        
+        
+        
+        
+        
+        //this.body.render.fillStyle = "#a9cdff";
         if(this.health <= 5){
             this.body.render.lineWidth = 1;
         }
         if(this.isHighlight){
-            this.body.render.strokeStyle = "#f03653";
-            this.body.render.lineWidth = 4;
+            this.body.render.strokeStyle = "rgb(240, 54, 83)";
+            this.body.render.lineWidth = 4; 
         }
     }
     
@@ -370,7 +396,7 @@ function MyBox(size){
             var none = this.comprehension[this.lastStatus + "3"];
             var readHealthExp = function(data){
                 if(data && data.count > 3){
-                    data=data.emotionExpect;
+                    data=data.healthExpect;
                 } else {
                     data=0.3;
                 }
