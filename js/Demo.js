@@ -187,8 +187,8 @@ function MyBox(size){
         //this.logic = [];
         //this.target = [];
         this.isDead = false;
-        this.selectMinTime = 1100;
-        this.selectMaxTime = 1300;
+        this.selectMinTime = 900;
+        this.selectMaxTime = 1100;
         this.selectJump = 3;
         this.selectLeft = 2;
         this.selectRight = 2;
