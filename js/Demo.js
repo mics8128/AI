@@ -60,23 +60,24 @@ World.add(engine.world, [wall_top, ground, wall_left, wall_right]);
 var tickCount = 0;
 var tickEvent = function(e){
     tickCount++;
-    if(tickCount > 60){
+    if(tickCount > 6){
         tickCount = 0;
         for(var i = 0; i < myboxs.length; i++){
             body = myboxs[i].body;
             if(body.angularSpeed < 0.1 && body.speed < 0.3){
                 var deg = rad_to_deg(body.angle);
                 if((deg < 315 && deg > 225)){           //立正站好的
-                    myboxs[i].healthChange(1);
+                    myboxs[i].healthChange(0.2);
                 } else if((deg < 135 && deg > 45)){     //倒立的
-                    myboxs[i].healthChange(-1);
-                    myboxs[i].emotionChange(-2);
+                    myboxs[i].healthChange(-0.1);
+                    myboxs[i].emotionChange(-0.2);
                 } else {                                //側躺
                     //myboxs[i].healthChange(-1);
                     //myboxs[i].emotionChange(-1);
                 }
-                
             }
+            //if(myboxs[i].health < 10) //低血量減心情
+               // myboxs[i].emotionChange(-0.07);
             myboxs[i].updateDisplay();
             
             //test action
@@ -102,22 +103,25 @@ var collisionStartEvent = function(e){
             insert_memory(calcObject, "ground", "start");
             //myboxs[calcObject.myboxs_id].jump();
             
-        }
-        else if(coll.bodyA.isStatic == false && coll.bodyB.isStatic == false)
-        {
+        } else if(coll.bodyA.isStatic == false && coll.bodyB.isStatic == false) {
             //console.log("CollObjectStart : " + coll.bodyA.id + " with " + coll.bodyB.id);
             insert_memory(coll.bodyA, coll.bodyB, "start");
             insert_memory(coll.bodyB, coll.bodyA, "start");
             if(Math.abs(coll.bodyA.position.y - coll.bodyB.position.y) > 40){
                 if(coll.bodyA.position.y > coll.bodyB.position.y){ //A在下面
                     myboxs[coll.bodyA.myboxs_id].emotionChange(-1);
+                    myboxs[coll.bodyA.myboxs_id].healthChange(-0.2);
                     myboxs[coll.bodyB.myboxs_id].emotionChange(1);
                     //console.log("song");
                 }else{ //B在下面
                     myboxs[coll.bodyB.myboxs_id].emotionChange(-1);
+                    myboxs[coll.bodyB.myboxs_id].healthChange(-0.2);
                     myboxs[coll.bodyA.myboxs_id].emotionChange(1);
                 }
             }
+        } else if(coll.bodyA.id == wall_top.id || coll.bodyB.id == wall_top.id) {
+            var calcObject = coll.bodyA.id == wall_top.id ? coll.bodyB : coll.bodyA;
+            myboxs[calcObject.myboxs_id].emotionChange(2);
         }
     }
 };
@@ -200,7 +204,7 @@ function MyBox(size){
 
     //UPDATE=============
     this.updateDisplay = function(){
-        $( "#box" + this.body.id ).html("No." + this.body.id + " - H:<span class=\"color_hp\">" + this.health + "</span> E:<span class=\"color_em\">" + this.emotion + "</span>");
+        $( "#box" + this.body.id ).html("No." + this.body.id + " - H:<span class=\"color_hp\">" + Math.ceil(this.health) + "</span> E:<span class=\"color_em\">" + Math.ceil(this.emotion) + "</span>");
     };
     
     this.updateColor = function(){
@@ -365,7 +369,12 @@ function MyBox(size){
                 }
                 return data;
             };
-            var readExp = readHealthExp;
+            var readExp
+            if(this.Health <= 10){
+                readExp = readHealthExp;
+            } else {
+                readExp = readEmotionExp;
+            }
             jump = readExp(jump);
             left = readExp(left);
             right = readExp(right);
