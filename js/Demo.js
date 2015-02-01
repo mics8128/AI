@@ -30,7 +30,7 @@ var renderOptions = engine.render.options;
 //renderOptions
 renderOptions.wireframes = false;
 renderOptions.hasBounds = false;
-renderOptions.showDebug = false;
+renderOptions.showDebug = true;
 renderOptions.showBroadphase = false;
 renderOptions.showBounds = false;
 renderOptions.showVelocity = false;
@@ -258,20 +258,24 @@ function MyBox(size){
         if(random <= this.selectJump){
             this.jump();
             //console.log("JUMP");
+            this.lastAction = "0";
             return;
         }
         random -= this.selectJump;
         
         if(random <= this.selectLeft){
             this.roateLeft();
+            this.lastAction = "1";
             return;
         }
         random -= this.selectLeft;
         
         if(random <= this.selectRight){
             this.roateRight();
+            this.lastAction = "2";
             return;
         }
+        this.lastAction = "3";
         //none ~
         //do nothing XD
     }
@@ -316,11 +320,30 @@ function MyBox(size){
     //about coll~
     this.writeComprehension = function(){
         //console.log(this.memory);
-        if(this.memory.length > 0){
-            console.log(this.getNearData());
+        if(this.memory.length > 0 && !isNaN(this.lastStatus)&& !isNaN(this.lastAction)){ // do comprehension
+            var newAngleExp = this.body.angle - this.memory[0].self.angle;
+            var newHealthExp = this.body.angle - this.memory[0].self.health;
+            var newEmotionExp = this.body.angle - this.memory[0].self.emotion;
+            var count = 1;
+            if(!isNaN(this.comprehension[this.lastStatus + this.lastAction])){
+                var comp = this.comprehension[this.lastStatus + this.lastAction];
+                newAngleExp = (comp.angleExpect*count + newEmotionExp)/(count+1);
+                newHealthExp = (comp.healthExpect*count + newEmotionExp)/(count+1);
+                newEmotionExp = (comp.emotionExpect*count + newEmotionExp)/(count+1);
+                count = comp.count + 1;
+            }
+            this.comprehension[this.lastStatus + this.lastAction] = {
+                angleExpect: newAngleExp,
+                healthExpect: newHealthExp,
+                emotionExpect: newEmotionExp,
+                count: count
+            };
+            console.log(newAngleExp + " " +newHealthExp + " " +newEmotionExp);
         }
         this.memory = [];
         insert_memory(this.body,"none","beforeAction");
+        this.lastStatus = deg_to_eight(rad_to_deg(this.body.angle)).toString() + this.getNearData();
+        //console.log(this.lastStatus + this.lastAction);
     }
     
     this.getNearData = function(){
@@ -390,7 +413,7 @@ function insert_memory(body, target, type){
     if(target != "ground"){
         target = {
             id: target.id,
-            angel: target.angle,
+            angle: target.angle,
             angularSpeed: target.angularSpeed,
             angularVelocity: target.angularVelocity,
             position: target.position,
@@ -401,11 +424,13 @@ function insert_memory(body, target, type){
     var this_memory = {
         type: type,
         self: { 
-            angel: body.angle,
+            angle: body.angle,
             angularSpeed: body.angularSpeed,
             angularVelocity: body.angularVelocity,
             position: body.position,
-            velocity: body.velocity
+            velocity: body.velocity,
+            health: myboxs[body.myboxs_id].health,
+            emotion: myboxs[body.myboxs_id].emotion
         },
         target: target,
         time: new Date().getTime()
@@ -420,4 +445,9 @@ function rad_to_deg(rad){
         deg = deg % 360;
     }
     return deg;
+}
+function deg_to_eight(deg){
+    var eight = deg/360*8+0.5;
+    if(eight >= 8)eight = eight - 8;
+    return Math.floor(eight);
 }

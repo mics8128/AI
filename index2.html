@@ -17,40 +17,20 @@
         -->
         
         <style>
-            body {
-             display:table;   
-            }
-            .container {
-             display:table-row;   
-            }
             #canvas-container {
-                
-                display:table-cell;   
+                float:left;
+                margin-right: 10px;
             }
             #health-bar{
-                width:150px;
-                display:table-cell;  
-                vertical-align: top;
+                margin-top: 5px;
             }
-            #add_sugar {
-                width:150px;
-                display:table-cell;
-                vertical-align: top;
-            }
-            #add_sugar input {
-                width:150px;
-                height:30px;
-                
-            }
-            
         </style>
         <title>Jump Sugar</title>
     </head>
     <body>
         <div class="container">
-
             <div id="canvas-container"></div>
-            <div id="add_sugar"><input type="button" onclick="addNewBox()" value="Add Jump Sugar" ></div>
+            <input type="button" onclick="addNewBox()" value="Add Jump Sugar">
             <div id="health-bar"></div>
         </div>
     </body
