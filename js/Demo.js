@@ -181,6 +181,7 @@ function MyBox(size){
         this.selectLeft = 2;
         this.selectRight = 2;
         this.selectNone = 3;
+        this.showlog = false;
         this.forceInterScale = Math.random()*0.4+1;
         this.speedInterScale = Math.random()*0.4+1;
         $( "#health-bar" ).html($( "#health-bar" ).html() + "<div id=\"box" + this.body.id + "\">Loading...</div>");
@@ -258,7 +259,7 @@ function MyBox(size){
         if(Math.abs(this.body.velocity.y) > 0.1)return; //有y動量就不能動
         this.writeComprehension();
         var selectAll = this.selectJump + this.selectLeft + this.selectRight + this.selectNone;
-        var random = Math.ceil(Math.random()*selectAll);
+        var random = Math.random()*selectAll;
         //console.log(random);
         if(random <= this.selectJump){
             this.jump();
@@ -349,7 +350,7 @@ function MyBox(size){
             var right = this.comprehension[this.lastStatus + "2"];
             var none = this.comprehension[this.lastStatus + "3"];
             var readHealthExp = function(data){
-                if(data && data.count > 5){
+                if(data && data.count > 3){
                     data=data.emotionExpect;
                 } else {
                     data=0.3;
@@ -357,7 +358,7 @@ function MyBox(size){
                 return data;
             };
             var readEmotionExp = function(data){
-                if(data && data.count > 5){
+                if(data && data.count > 3){
                     data=data.emotionExpect;
                 } else {
                     data=0.3;
@@ -376,8 +377,10 @@ function MyBox(size){
                 right -= min;
                 none -= min;
             }
-            console.log(jump, left, right, none);
-            console.log("Key:" + this.lastStatus + this.lastAction + "\nAngle:" +newAngleExp + "\nHealth:" +newHealthExp + "\nEmotion:" +newEmotionExp + "\nCount:" +count);
+            if(this.showlog){
+                console.log("\nJump: " + jump + "\nLeft: " + left + "\nRight: " + right + "\nNone: " + none);
+                console.log("\nKey:" + this.lastStatus + this.lastAction + "\nAngle:" +newAngleExp + "\nHealth:" +newHealthExp + "\nEmotion:" +newEmotionExp + "\nCount:" +count);
+            }
         }
         this.memory = [];
         insert_memory(this.body,"none","beforeAction");
