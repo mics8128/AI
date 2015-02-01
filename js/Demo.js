@@ -203,6 +203,7 @@ function MyBox(size){
     };
     
     this.updateColor = function(){
+
         if(this.emotion <= -40){
             this.body.render.fillStyle = "#1f5784";
         }else if(this.emotion <= -20){
@@ -216,10 +217,13 @@ function MyBox(size){
         }
         if(this.health <= 1){
             this.body.render.strokeStyle = "#fc0b0b";
+            this.body.render.lineWidth = 3;
         }else if(this.health <= 5){
             this.body.render.strokeStyle = "#ff4848";
+            this.body.render.lineWidth = 2;
         }else{
             this.body.render.strokeStyle = "#9d7272";
+            this.body.render.lineWidth = 1;
         }
     }
     
@@ -344,8 +348,8 @@ function MyBox(size){
             var left = this.comprehension[this.lastStatus + "1"];
             var right = this.comprehension[this.lastStatus + "2"];
             var none = this.comprehension[this.lastStatus + "3"];
-            var readEmotionExp = function(data){
-                if(data && data.count > 10){
+            var readHealthExp = function(data){
+                if(data && data.count > 5){
                     data=data.emotionExpect;
                 } else {
                     data=0.3;
@@ -353,16 +357,20 @@ function MyBox(size){
                 return data;
             };
             var readEmotionExp = function(data){
-                if(data && data.count > 10){
+                if(data && data.count > 5){
                     data=data.emotionExpect;
                 } else {
                     data=0.3;
                 }
                 return data;
             };
-            jump = readEmotionExp(jump);
-            this.actionSet(jump, left, right, none);
-            //console.log("Key:" + this.lastStatus + this.lastAction + "\nAngle:" +newAngleExp + "\nHealth:" +newHealthExp + "\nEmotion:" +newEmotionExp + "\nCount:" +count);
+            var readExp = readHealthExp;
+            jump = readExp(jump);
+            left = readExp(left);
+            right = readExp(right);
+            none = readExp(none);
+            console.log(jump, left, right, none);
+            console.log("Key:" + this.lastStatus + this.lastAction + "\nAngle:" +newAngleExp + "\nHealth:" +newHealthExp + "\nEmotion:" +newEmotionExp + "\nCount:" +count);
         }
         this.memory = [];
         insert_memory(this.body,"none","beforeAction");
