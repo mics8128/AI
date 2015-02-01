@@ -40,7 +40,7 @@ renderOptions.showPositions = false;
 renderOptions.showAngleIndicator = true;
 renderOptions.showIds = true;
 renderOptions.showShadows = false;
-renderOptions.background = '#fff';
+renderOptions.background = '#a9cdff';
 
 // create two boxes and a ground
 var wall_top = Bodies.rectangle(400, -30, 810, 100, { isStatic: true });
@@ -193,13 +193,13 @@ function MyBox(size){
         this.selectLeft = 2;
         this.selectRight = 2;
         this.selectNone = 3;
+        this.isHighlight = false;
         this.showlog = false;
         this.forceInterScale = Math.random()*0.4+1;
         this.speedInterScale = Math.random()*0.4+1;
-        $( "#health-bar" ).html($( "#health-bar" ).html() + "<div id=\"box" + this.body.id + "\">Loading...</div>");
+        $( "#health-bar" ).html($( "#health-bar" ).html() + "<div onMouseOver=\"enableHightlight(" + this.body.id + ")\" onMouseOut =\"disableHighlight(" + this.body.id + ")\" class=\"li_no\" id=\"li_no_" + this.body.id + "\"><div class=\"no_title\">No" + this.body.id + "</div><div class=\"hp_border\" ><div class=\"hp_line\" style=\"\"></div></div><div class=\"em_border\" ><div class=\"em_line\" style=\"\"></div></div></div>");
         setTimeout(this.selfTimer, 1000, this);
     };
-    
     this.selfTimer = function(self){
         var time = Math.floor(Math.random()*(self.selectMaxTime - self.selectMinTime)) + self.selectMinTime;
         time = time * self.speedInterScale;
@@ -213,31 +213,37 @@ function MyBox(size){
 
     //UPDATE=============
     this.updateDisplay = function(){
-        $( "#box" + this.body.id ).html("No." + this.body.id + " - H:<span class=\"color_hp\">" + Math.ceil(this.health) + "</span> E:<span class=\"color_em\">" + Math.ceil(this.emotion) + "</span>");
+        //$( "#box" + this.body.id ).html("No." + this.body.id + " - H:<span class=\"color_hp\">" + Math.ceil(this.health) + "</span> E:<span class=\"color_em\">" + Math.ceil(this.emotion) + "</span>");
+    $( "#li_no_" + this.body.id + " .hp_line" ).attr("style","width:" + Math.ceil(this.health/20*250) + "px");
+    $( "#li_no_" + this.body.id + " .em_line" ).attr("style","width:" + Math.ceil((this.emotion+50)/100*250) + "px");
     };
     
-    this.updateColor = function(){
 
+    this.updateColor = function(){
+        
+        this.body.render.lineWidth = 2;
+        
+        /*
         if(this.emotion <= -40){
-            this.body.render.fillStyle = "#1f5784";
+            this.body.render.fillStyle = "#a9cdff";
         }else if(this.emotion <= -20){
-            this.body.render.fillStyle = "#479ee5";
+            this.body.render.fillStyle = "#a9cdff";
         }else if(this.emotion >= 20){
-            this.body.render.fillStyle = "#bae0ff";
+            this.body.render.fillStyle = "#a9cdff";
         }else if(this.emotion >= 40){
-            this.body.render.fillStyle = "#baffe6";
+            this.body.render.fillStyle = "#a9cdff";
         }else{ //一般顏色
-        this.body.render.fillStyle = "#73baf4";
+            this.body.render.fillStyle = "#f03653";
         }
-        if(this.health <= 1){
-            this.body.render.strokeStyle = "#fc0b0b";
-            this.body.render.lineWidth = 3;
-        }else if(this.health <= 5){
-            this.body.render.strokeStyle = "#ff4848";
-            this.body.render.lineWidth = 2;
-        }else{
-            this.body.render.strokeStyle = "#9d7272";
+        */
+        this.body.render.strokeStyle = "#FFF";
+        this.body.render.fillStyle = "#a9cdff";
+        if(this.health <= 5){
             this.body.render.lineWidth = 1;
+        }
+        if(this.isHighlight){
+            this.body.render.strokeStyle = "#f03653";
+            this.body.render.lineWidth = 4;
         }
     }
     
@@ -442,7 +448,7 @@ function MyBox(size){
     
     this.destroy = function(){
         World.remove(engine.world, this.body);
-        $( "#box" + this.body.id ).remove();
+        $( "#li_no_" + this.body.id ).remove();
         this.isDead = true;
     };
     
@@ -457,6 +463,11 @@ var isSpeed = false;
 function speed2x()
 {
     isSpeed = !isSpeed;
+    if(isSpeed){
+        $("#label_2x").show();
+    } else {
+        $("#label_2x").hide();
+    }
 }
 
 function addNewBox(){
@@ -468,6 +479,16 @@ function addNewBox(){
 /************************* 
 ** SomeFunction
 *************************/
+function enableHightlight(id){
+    // FIX WTF
+    myboxs[id-6].isHighlight = true;
+    myboxs[id-6].updateColor();
+}
+function disableHighlight(id){
+    // FIX WTF
+    myboxs[id-6].isHighlight = false;
+    myboxs[id-6].updateColor();
+}
 function floatCompare(a,b)
 {
         if(Math.abs(a - b) < 0.1)
@@ -516,4 +537,9 @@ function deg_to_eight(deg){
     var eight = deg/360*8+0.5;
     if(eight >= 8)eight = eight - 8;
     return Math.floor(eight);
+}
+
+function id_to_index(id)
+{
+    return id - 6;
 }
