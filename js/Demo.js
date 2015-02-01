@@ -86,7 +86,7 @@ var tickEvent = function(e){
         
     }
 };
-Events.on(engine, "tick", tickEvent ); 
+Events.on(engine, "beforeUpdate", tickEvent ); 
 
 /*****************
 **Event collisionStart
@@ -152,6 +152,14 @@ var collisionEndEvent = function(e){
 };
 Events.on(engine, "collisionEnd", collisionEndEvent ); 
 
+/*****************
+**Event beforeRender
+*****************/
+var beforeRender = function(){
+    if(isSpeed)
+        Engine.update(engine,16.66);
+}
+Events.on(engine, "beforeRender", beforeRender );
 
 //RUN!!!!!!!
 Engine.run(engine);
@@ -189,7 +197,7 @@ function MyBox(size){
         this.forceInterScale = Math.random()*0.4+1;
         this.speedInterScale = Math.random()*0.4+1;
         $( "#health-bar" ).html($( "#health-bar" ).html() + "<div id=\"box" + this.body.id + "\">Loading...</div>");
-        setTimeout(this.selfTimer, 2000, this);
+        setTimeout(this.selfTimer, 1000, this);
     };
     
     this.selfTimer = function(self){
@@ -197,6 +205,7 @@ function MyBox(size){
         time = time * self.speedInterScale;
         if(self.health <= 5)time *= 0.5;
         if(self.health <= 1)time *= 0.4;
+        if(isSpeed)time/=2;
         //console.log(time);
         self.doAction();
         setTimeout(self.selfTimer, time, self);
@@ -444,6 +453,12 @@ function MyBox(size){
 /************************* 
 ** ButtonFunction
 *************************/
+var isSpeed = false;
+function speed2x()
+{
+    isSpeed = !isSpeed;
+}
+
 function addNewBox(){
     var myboxs_id = myboxs.length;
     myboxs[myboxs_id]=new MyBox(50);
