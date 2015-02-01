@@ -5,7 +5,20 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <meta name="viewport" content="width=device-width">
         <meta name="robots" content="noindex">
+<!--
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
         <!-- matter lib v0.8.0 -->
         <script type="text/javascript" src="./js/lib/matter-0.8.0.js"></script>
         <script type="text/javascript" src="./js/jquery-1.11.2.min.js"></script>
@@ -17,22 +30,135 @@
         -->
         
         <style>
+            body {
+                background:#a9cdff;
+             /*display:table;   */
+            }
+            #wrapper {
+                width:1100px;
+                margin:0px auto;
+            }
+            #logo {
+                color:#FFF;
+                font-size:30px;
+            }
+            .container {
+             /*display:table-row;   */
+            }
             #canvas-container {
+                width:800px;
                 float:left;
-                margin-right: 10px;
+                border:#cfebff 3px solid;
+               /* display:table-cell;   */
             }
             #health-bar{
-                margin-top: 5px;
+                font-size:20px;
+                width:250px;
+                vertical-align: top;
+                overflow-y: scroll;
+                overflow-x: hidden;
+                height:550px;
+            }
+            #add_sugar {
+                width:250px;
+                float:right;
+              /*  display:table-cell;*/
+                vertical-align: top;
+                
+                
+            }
+            #add_sugar input[type='button'] {
+                width:100%;
+                height:30px;
+                background:#9cbbff;
+                border:1px solid #FFF;
+                color:#FFF;
+                
+            }
+            .color_hp { color:#e60000;}
+            
+            .color_em { color:#0880f8;}
+            
+            
+            .li_no:hover{
+                background:#FFF;
+                
+            }
+            
+            .no_title {
+                color:#4730f4;   
+                
+            }
+            
+            .hp_border {
+                height:10px;
+                width:250px;
+                border:1px solid #fff;
+                background: #5598f7;
+            }
+            .em_border {
+                height:10px;
+                width:250px;
+                border:1px solid #fff;
+                background: #5598f7;
+            }
+            
+            .hp_line {
+                height:10px;
+                background: #ffa3a3;
+            }
+            .em_line {
+                height:10px;
+                background: #a3ffa7;
+            }
+            
+            
+            
+            #label_2x {
+                float: left;
+                clear:left;
+                color:#FFF;
+                font-size:30px;
+                display:none;
             }
         </style>
         <title>Jump Sugar</title>
     </head>
     <body>
-        <div class="container">
-            <div id="canvas-container"></div>
-            <input type="button" onclick="addNewBox()" value="Add Jump Sugar">
-            <div id="health-bar"></div>
+        <div id="wrapper" align="center">
+            <div align="left">
+            <div id="logo">
+                <img src="img/logo.png" height="100px" />
+                <img src="img/text.png" height="100px" />
+            </div>
+            <div class="container">
+
+                <div id="canvas-container"></div>
+                <div id="add_sugar">
+                    <input type="button" onclick="addNewBox()" value="加糖!!" >
+                    <input type="button" onclick="speed2x()" value="兩倍濃縮" > 
+                    <div id="health-bar">
+
+                    </div>
+                    <!--
+                        <div class="li_no" id="li_no_1">
+                            <div class="no_title">No1</div>
+                            <div class="hp_border" >
+                                <div class="hp_line"></div>
+                            </div>
+                            <div class="em_border" >
+                                <div class="em_line"></div>
+                            </div>
+                        </div>
+-->
+                </div>
+                <div id="label_2x">2倍攪拌中!!!</div>
+            </div>
+                
+            </div>
+            
         </div>
+        
     </body
 </html>
 <script type="text/javascript" src="./js/Demo.js"></script>
